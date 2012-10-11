@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this file,
+   - You can obtain one at http://mozilla.org/MPL/2.0/.  -->
+<html>
+
+<head>
+    <title>Custom Chart - Perf-o-Matic</title>
+    <link rel="stylesheet" href="css/reset.min.css" type="text/css" />
+    <link rel="stylesheet" href="css/common.css" type="text/css" />
+    <link rel="stylesheet" href="css/graph.css" type="text/css" />
+</head>
+
+<body>
+
+<header id="header">
+    <h1>
+        <a href="index.html"><span id="logo">Perf-O-Matic</span></a>
+    </h1>
+    <nav>
+        <a href="index.html">Dashboard</a>
+        <a class="selected" href="graph.html">Custom Chart</a>
+    </nav>
+</header>
+
+<div id="toolbar">
+    <div class="group">
+        <span id="displayrange" class="button selectBox disabled" title="Time range to display">
+            <select>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last 365 days</option>
+            </select>
+        </span>
+        <span id="datatype" class="button selectBox disabled" title="Type of data to display">
+            <select>
+                <option value="running">Running time</option>
+                <option value="delta">Time delta</option>
+                <option value="deltapercent">Time delta %</option>
+            </select>
+        </span>
+    </div>
+
+    <div class="group">
+        <a id="zoomin" class="button disabled" href="#" title="Zoom in on the selected range">Zoom In</a>
+        <a id="zoomout" class="button disabled" href="#" title="Zoom out from the selected range">Zoom Out</a>
+    </div>
+
+    <div class="group">
+        <span id="changeset-buttons" class="subgroup"></span>
+        <a id="exportcsv" class="button disabled" href="#">Export CSV</a>
+    </div>
+
+    <div class="group">
+        <a id="chart-link" class="button disabled" href="#" title="Create a short link to this chart">Link</a>
+        <a id="chart-embed" class="button disabled" href="#" title="Generate code to embed this chart">Embed</a>
+    </div>
+</div>
+
+<div id="options">
+    <ul id="legend">
+    </ul>
+    
+    <a id="add-series" href="#"><span>Add More Test Data</span></a>
+    
+</div>
+
+
+<div id="charts">
+    <div id="overview-box"><div id="overview"></div></div>
+    <div id="plot-box"><div id="plot"></div></div>
+    <div id="errors">
+    </div>
+</div>
+
+
+<div id="tooltip">
+    <div class="body">
+        <div>
+            <p id="tt-series"></p>
+            <p id="tt-series2" class="small"></p>
+        </div>
+        <div>
+            <p id="tt-v"></p>
+            <p id="tt-dv" class="small"></p>
+        </div>
+        <div>
+            <p><a id="tt-cset" href="#"></a></p>
+            <p id="tt-scsets"></p>
+            <p id="tt-t" class="small"></p>
+        </div>
+        <p id="tt-help">Click to lock</p>
+    </div>
+    <div class="tip"></div>
+</div>
+
+<section id="add-overlay">
+    <div>
+        <form id="add-data-form">
+            <h2>Add Test Data</h2>
+            <fieldset>
+                <div>
+                    <label for="add-branches">Select Branches:</label>
+                    <select id="add-branches" multiple="multiple"></select>
+                </div>
+                <div>
+                    <label for="add-tests">Select Tests:</label>
+                    <select id="add-tests" multiple="multiple"></select>
+                </div>
+                <div>
+                    <label for="add-platforms">Select Platforms:</label>
+                    <select id="add-platforms" multiple="multiple"></select>
+                </div>
+            </fieldset>
+            <footer>
+                <button id="add-data-cancel" href="#">Cancel</button>
+                <button class="disabled" id="add-series-done" type="submit">Add 0 Data Series</button>
+            </footer>
+        </form>
+    </div>
+</section>
+
+
+<section id="link-overlay" class="bubble-overlay">
+    <form class="bubble-wrap"><div class="bubble">
+        <span class="stem"></span>
+        <div class="content">
+            <label>Link to this chart:</label>
+            <input id="link-url" type="text" readonly value="" />
+        </div>
+    </div></form>
+</section>
+
+
+<section id="embed-overlay" class="bubble-overlay">
+    <form class="bubble-wrap"><div class="bubble">
+        <span class="stem"></span>
+        <div class="content">
+            <label>Use this code to embed this chart:</label>
+            <textarea id="embed-code" rows="3" readonly></textarea>
+        </div>
+    </div></form>
+</section>
+
+<div id="showchangesets-overlay">
+    <div id="changesets"></div>
+</div>
+
+<div id="loading-overlay">
+    <div><b></b><span>Loading test data...</span></div>
+</div>
+
+
+<script type="text/javascript" src="jq/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="jq/flot-0.7/jquery.flot.min.js"></script>
+<script type="text/javascript" src="jq/flot-0.7/jquery.flot.fillbetween.min.js"></script>
+<script type="text/javascript" src="jq/flot-0.7/jquery.flot.selection.min.js"></script>
+<script type="text/javascript" src="jq/flot-0.7/jquery.flot.crosshair.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/graph-2.js"></script>
+
+</body>
+
+</html>
