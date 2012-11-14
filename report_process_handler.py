@@ -63,9 +63,11 @@ class ReportProcessHandler(webapp2.RequestHandler):
             result = TestResult.get_or_insert_from_parsed_json(test_name, build, result_value)
             runs = Runs.get_by_objects(branch, platform, test)
             regenerate_runs = True
-            if runs:
-                runs.update_incrementally(build, result)
-                regenerate_runs = False
+# Force all runs to be re-generated to truncate results before 2012/6/1 since we're hitting the object size limit.
+# FIXME: Uncomment these lines out once Chromium results have caught up.
+#            if runs:
+#                runs.update_incrementally(build, result)
+#                regenerate_runs = False
             schedule_runs_update(test.id, branch.id, platform.id, regenerate_runs)
 
         log = ReportLog.get(log.key())

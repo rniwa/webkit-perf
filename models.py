@@ -413,7 +413,8 @@ class Runs(db.Model):
         runs = Runs(key_name=key_name, branch=branch, platform=platform, test=test, json_runs='', json_averages='')
 
         for build, result in cls._generate_runs(branch, platform, test.name):
-            runs.update_incrementally(build, result, check_duplicates_and_save=False)
+            if build.timestamp > datetime.datetime(2012, 6, 1):
+                runs.update_incrementally(build, result, check_duplicates_and_save=False)
 
         runs.put()
         memcache.set(key_name, runs.to_json())
