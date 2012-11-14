@@ -388,7 +388,8 @@ class Runs(db.Model):
         supplementary_revisions = None
 
         if result.valueStdev != None and result.valueMin != None and result.valueMax != None:
-            statistics = {'stdev': result.valueStdev, 'min': result.valueMin, 'max': result.valueMax}
+            statistics = {'stdev': result.valueStdev, 'median': result.valueMedian,
+                'min': result.valueMin, 'max': result.valueMax, 'values': result.values}
 
         if build.chromiumRevision != None:
             supplementary_revisions = {'Chromium': build.chromiumRevision}
