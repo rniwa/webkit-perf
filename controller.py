@@ -29,15 +29,18 @@
 
 import urllib
 import webapp2
+from datetime import datetime
 from google.appengine.api import taskqueue
 from google.appengine.ext import db
 
 from json_generators import DashboardJSONGenerator
 from json_generators import ManifestJSONGenerator
 from models import Branch
+from models import Build
 from models import DashboardImage
 from models import PersistentCache
 from models import Platform
+from models import ReportLog
 from models import Runs
 from models import Test
 from models import model_from_numeric_id
@@ -85,9 +88,34 @@ class CachedDashboardHandler(webapp2.RequestHandler):
             schedule_dashboard_update()
 
 
+def schedule_commit_all():
+    taskqueue.add(url='/admin/commit-all', params={'in-background': True}, target='model-manipulator')
+
+class CommitAllHandler(webapp2.RequestHandler):
+    def get(self):
+        self.response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        schedule_commit_all()
+        self.response.out.write('OK')
+
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        logs = ReportLog.all()
+        limit = 50
+        count = 0
+        for log in logs.fetch(limit):
+            log.commit = True
+            log.put()
+            schedule_report_process(log)
+            count += 1
+        if count == limit:
+            schedule_commit_all()
+        self.response.out.write('OK')
+
+
 def schedule_runs_update(test_id, branch_id, platform_id, regenerate_runs=True):
     if regenerate_runs:
-        taskqueue.add(url='/api/test/runs/update', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id})
+        taskqueue.add(url='/api/test/runs/update', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id},
+            target='model-manipulator')
     taskqueue.add(url='/api/test/runs/chart', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id,
         'displayDays': 7})
 

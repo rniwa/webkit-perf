@@ -221,6 +221,10 @@ class TestResult(db.Model):
         if not isinstance(result, dict):
             return cls.get_or_insert(key_name, name=test_name, build=build, value=float(result))
 
+        # Skip malformed entries.
+        if 'avg' not in result:
+            return None
+
         return cls.get_or_insert(key_name, name=test_name, build=build, value=float(result['avg']),
             valueMedian=_float_or_none(result, 'median'), valueStdev=_float_or_none(result, 'stdev'),
             valueMin=_float_or_none(result, 'min'), valueMax=_float_or_none(result, 'max'),
@@ -388,7 +392,7 @@ class Runs(db.Model):
         supplementary_revisions = None
 
         if result.valueStdev != None and result.valueMin != None and result.valueMax != None:
-            statistics = {'stdev': result.valueStdev, 'min': result.valueMin, 'max': result.valueMax}
+            statistics = {'stdev': result.valueStdev, 'min': result.valueMin, 'max': result.valueMax, 'values': result.values}
 
         if build.chromiumRevision != None:
             supplementary_revisions = {'Chromium': build.chromiumRevision}

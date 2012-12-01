@@ -27,6 +27,7 @@ from admin_handlers import MergeTestsHandler
 from controller import CachedDashboardHandler
 from controller import CachedManifestHandler
 from controller import CachedRunsHandler
+from controller import CommitAllHandler
 from controller import DashboardImageHandler
 from controller import DashboardUpdateHandler
 from controller import ManifestUpdateHandler
@@ -44,6 +45,7 @@ routes = [
     ('/admin/report-logs/?', ReportLogsHandler),
     ('/admin/create/(.*)', CreateHandler),
     ('/admin/change-visibility/?', ChangeVisibilityHandler),
+    ('/admin/commit-all', CommitAllHandler),
     (r'/admin/([A-Za-z\-]*)', AdminDashboardHandler),
 
     ('/api/user/is-admin', IsAdminHandler),

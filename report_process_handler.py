@@ -61,6 +61,8 @@ class ReportProcessHandler(webapp2.RequestHandler):
             unit = result_value.get('unit') if isinstance(result_value, dict) else None
             test = Test.update_or_insert(test_name, branch, platform, unit)
             result = TestResult.get_or_insert_from_parsed_json(test_name, build, result_value)
+            if not result:
+                continue
             runs = Runs.get_by_objects(branch, platform, test)
             regenerate_runs = True
             if runs:
