@@ -218,7 +218,7 @@ GraphCommon.convertData = function(testName, branchName, platformName, data,
             current_run['additionalChangesets'] = additionalChangesets;
         }
 
-        if (changeset in averages) {
+        if (true /* changeset in averages */) {
             gdata.mean.push(current_run);
         }
 

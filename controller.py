@@ -116,8 +116,8 @@ def schedule_runs_update(test_id, branch_id, platform_id, regenerate_runs=True):
     if regenerate_runs:
         taskqueue.add(url='/api/test/runs/update', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id},
             target='model-manipulator')
-    taskqueue.add(url='/api/test/runs/chart', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id,
-        'displayDays': 7})
+#    taskqueue.add(url='/api/test/runs/chart', params={'id': test_id, 'branchid': branch_id, 'platformid': platform_id,
+#        'displayDays': 7})
 
 
 def _get_test_branch_platform_ids(handler):
@@ -161,7 +161,7 @@ class CachedRunsHandler(webapp2.RequestHandler):
 
 class RunsChartHandler(webapp2.RequestHandler):
     def post(self):
-        x = 0
+        return
         self.response.headers['Content-Type'] = 'text/plain; charset=utf-8'
         test_id, branch_id, platform_id = _get_test_branch_platform_ids(self)
 

@@ -366,6 +366,7 @@ class Runs(db.Model):
     platform = db.ReferenceProperty(Platform, required=True, collection_name='runs_platform')
     test = db.ReferenceProperty(Test, required=True, collection_name='runs_test')
     json_runs = db.TextProperty()
+    json_runs2 = db.TextProperty()
     json_averages = db.TextProperty()
     json_min = db.FloatProperty()
     json_max = db.FloatProperty()
@@ -373,10 +374,13 @@ class Runs(db.Model):
     @staticmethod
     def _generate_runs(branch, platform, test_name):
         builds = Build.all()
-        builds.filter('branch =', branch)
-        builds.filter('platform =', platform)
+        builds.filter('timestamp > ', datetime(2012, 12, 22))
+#        builds.filter('branch =', branch)
+#        builds.filter('platform =', platform)
 
         for build in builds:
+            if Build.branch.get_value_for_datastore(build) != branch.key() or Build.platform.get_value_for_datastore(build) != platform.key():
+                continue
             results = TestResult.all()
             results.filter('name =', test_name)
             results.filter('build =', build)
@@ -426,21 +430,26 @@ class Runs(db.Model):
     def update_incrementally(self, build, result, check_duplicates_and_save=True):
         new_entry = Runs._entry_from_build_and_result(build, result)
 
-        # Check for duplicate entries
-        if check_duplicates_and_save:
-            revision_is_in_runs = str(build.revision) in json.loads('{' + self.json_averages + '}')
-            if revision_is_in_runs and new_entry[1] in [entry[1] for entry in json.loads('[' + self.json_runs + ']')]:
-                return
+        # Save space
+        self.json_averages = None
+        self.json_runs = self.json_runs.replace(', ', ',')
 
+        additional_json_runs_string = json.dumps(new_entry)
         if self.json_runs:
-            self.json_runs += ','
+            additional_json_runs_string = ',' + additional_json_runs_string.replace(', ', ',')
 
-        if self.json_averages:
-            self.json_averages += ','
+        # Check for duplicate entries
+        if additional_json_runs_string in self.full_json_runs():
+            return
 
-        self.json_runs = (self.json_runs + json.dumps(new_entry)).replace(', ', ',')
+        if len(self.json_runs) + len(additional_json_runs_string) >= 1000000:
+            if not self.json_runs2:
+                self.json_runs2 = ''
+            self.json_runs2 += additional_json_runs_string
+        else:
+            self.json_runs += additional_json_runs_string
+
         # FIXME: Calculate the average. In practice, we wouldn't have more than one value for a given revision.
-        self.json_averages = (self.json_averages + '"%d":%f' % (build.revision, result.value)).replace(', ', ',')
         self.json_min = min(self.json_min, result.value) if self.json_min != None else result.value
         self.json_max = max(self.json_max, result.value)
 
@@ -464,17 +473,20 @@ class Runs(db.Model):
             memcache.set(key_name, runs_json)
         return runs_json
 
+    def full_json_runs(self):
+        return self.json_runs + (self.json_runs2 if self.json_runs2 else '')
+
     def to_json(self):
         # date_range is never used by common.js.
-        return '{"test_runs": [%s], "averages": {%s}, "min": %s, "max": %s, "unit": %s, "date_range": null, "stat": "ok"}' % (self.json_runs,
-            self.json_averages, str(self.json_min) if self.json_min else 'null', str(self.json_max) if self.json_max else 'null',
+        return '{"test_runs": [%s], "averages": {}, "min": %s, "max": %s, "unit": %s, "date_range": null, "stat": "ok"}' % (self.full_json_runs(),
+            str(self.json_min) if self.json_min else 'null', str(self.json_max) if self.json_max else 'null',
             '"%s"' % self.test.unit if self.test.unit else 'null')
 
     def chart_params(self, display_days):
         chart_data_x = []
         chart_data_y = []
         timestamp_from_entry = lambda entry: Runs._timestamp_and_value_from_json_entry(entry)[0]
-        runs = sorted(json.loads('[' + self.json_runs + ']'), lambda a, b: int(timestamp_from_entry(a) - timestamp_from_entry(b)))
+        runs = sorted(json.loads('[' + self.full_json_runs() + ']'), lambda a, b: int(timestamp_from_entry(a) - timestamp_from_entry(b)))
         if not runs:
             return None
 
